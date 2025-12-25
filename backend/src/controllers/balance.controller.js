@@ -1,3 +1,4 @@
 export const getBalance = (req, res) => {
-  res.json({ message: 'Get balance' });
+  const { groupId } = req.params;
+  res.json({ message: `Get balance for group ${groupId}` });
 };

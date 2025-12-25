@@ -3,7 +3,7 @@ import { getExpenses, createExpense } from '../controllers/expense.controller.js
 
 const router = express.Router();
 
-router.get('/', getExpenses);
+router.get('/:groupId', getExpenses);
 router.post('/', createExpense);
 
 export default router;

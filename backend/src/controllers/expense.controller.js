@@ -1,5 +1,6 @@
 export const getExpenses = (req, res) => {
-  res.json({ message: 'Get expenses' });
+  const { groupId } = req.params;
+  res.json({ message: `Get expenses for group ${groupId}` });
 };
 
 export const createExpense = (req, res) => {

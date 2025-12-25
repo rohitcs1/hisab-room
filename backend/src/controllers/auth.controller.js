@@ -1,110 +1,80 @@
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { supabase } from '../config/supabase.js';
 
 export const signup = async (req, res) => {
-  const { email, phone, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!password) {
-    return res.status(400).json({ error: 'Password is required' });
-  }
-
-  if (!email && !phone) {
-    return res.status(400).json({ error: 'Either email or phone is required' });
-  }
-
-  if (email && phone) {
-    return res.status(400).json({ error: 'Provide either email or phone, not both' });
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const userData = {
-      email: email || null,
-      phone: phone || null,
-      password: hashedPassword,
-    };
-
-    const { data, error } = await supabase
-      .from('users')
-      .insert(userData)
-      .select('id, email, phone, created_at')
-      .single();
+    // Use Supabase auth to create user
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
     if (error) {
-      if (error.code === '23505') {
-        return res.status(400).json({ error: 'Email or phone already exists' });
-      }
-      console.error('Supabase error:', error);
-      return res.status(500).json({ error: 'Database error' });
+      return res.status(400).json({ error: error.message });
     }
 
-    const token = jwt.sign({ id: data.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    // Create a custom JWT for our API
+    const token = jwt.sign(
+      { id: data.user.id, email: data.user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     res.status(201).json({
       token,
       user: {
-        id: data.id,
-        email: data.email,
-        phone: data.phone,
-        created_at: data.created_at
-      }
+        id: data.user.id,
+        email: data.user.email,
+        isAdmin: data.user.email === 'starhacker160@gmail.com',
+      },
     });
   } catch (err) {
     console.error('Signup error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 export const login = async (req, res) => {
-  const { email, phone, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!password) {
-    return res.status(400).json({ error: 'Password is required' });
-  }
-
-  if (!email && !phone) {
-    return res.status(400).json({ error: 'Either email or phone is required' });
-  }
-
-  if (email && phone) {
-    return res.status(400).json({ error: 'Provide either email or phone, not both' });
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
   }
 
   try {
-    let query = supabase.from('users').select('id, email, phone, password, created_at');
+    // Use Supabase auth to sign in user
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (email) {
-      query = query.eq('email', email);
-    } else {
-      query = query.eq('phone', phone);
+    if (error) {
+      return res.status(400).json({ error: error.message });
     }
 
-    const { data, error } = await query.single();
+    // Create a custom JWT for our API
+    const token = jwt.sign(
+      { id: data.user.id, email: data.user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
-    if (error || !data) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const isValidPassword = await bcrypt.compare(password, data.password);
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign({ id: data.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-    res.json({
+    res.status(200).json({
       token,
       user: {
-        id: data.id,
-        email: data.email,
-        phone: data.phone,
-        created_at: data.created_at
-      }
+        id: data.user.id,
+        email: data.user.email,
+        isAdmin: data.user.email === 'starhacker160@gmail.com',
+      },
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

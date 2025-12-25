@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import MobileLayout from '../components/Layout/MobileLayout'
 import DesktopLayout from '../components/Layout/DesktopLayout'
 import Avatar from '../components/common/Avatar'
-import { groupService, expenseService } from '../services/supabase'
+import { groupService } from '../services/group.service'
+import { expenseService } from '../services/expense.service'
 
 const categories = [
   { id: 'grocery', name: 'Grocery', icon: '🍚' },

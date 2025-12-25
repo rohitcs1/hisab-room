@@ -5,7 +5,7 @@ import MobileLayout from '../components/Layout/MobileLayout'
 import DesktopLayout from '../components/Layout/DesktopLayout'
 import Avatar from '../components/common/Avatar'
 import FAB from '../components/common/FAB'
-import { groupService } from '../services/supabase'
+import { groupService } from '../services/group.service'
 
 export default function GroupList() {
   const [groups, setGroups] = useState([])
@@ -50,10 +50,7 @@ export default function GroupList() {
   )
 
   const handleCreateGroup = () => {
-    const name = prompt('Enter group name:')
-    if (name) {
-      navigate(`/group/new`)
-    }
+    navigate('/create-group')
   }
 
   const content = (
@@ -64,7 +61,7 @@ export default function GroupList() {
           <h1 className="text-xl font-bold text-primary-600">HisabRoom</h1>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate('/group/new')}
+              onClick={() => navigate('/scan')}
               className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
               aria-label="QR Scanner"
             >

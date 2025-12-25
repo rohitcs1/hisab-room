@@ -3,6 +3,6 @@ import { getBalance } from '../controllers/balance.controller.js';
 
 const router = express.Router();
 
-router.get('/', getBalance);
+router.get('/:groupId', getBalance);
 
 export default router;

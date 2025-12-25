@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import MobileLayout from '../components/Layout/MobileLayout'
 import DesktopLayout from '../components/Layout/DesktopLayout'
-import { groupService } from '../services/supabase'
+import { groupService } from '../services/group.service'
 
 export default function GroupDashboard() {
   const { groupId } = useParams()

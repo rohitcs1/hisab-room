@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { signup, login } from '../services/auth.service.js'
 
 const AuthContext = createContext({})
 
@@ -20,54 +21,16 @@ export function AuthProvider({ children }) {
     setLoading(false)
   }, [])
 
-  const signIn = async (identifier, password) => {
-    const body = { password }
-    if (identifier.includes('@')) {
-      body.email = identifier
-    } else {
-      body.phone = identifier
-    }
-
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    })
-
-    const data = await response.json()
-    if (!response.ok) {
-      throw new Error(data.error || 'Login failed')
-    }
-
+  const signIn = async (email, password) => {
+    const data = await login(email, password)
     localStorage.setItem('token', data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
     setUser(data.user)
     return data
   }
 
-  const signUp = async (email, password, phone) => {
-    const body = { password }
-    if (phone) {
-      body.phone = phone
-    } else {
-      body.email = email
-    }
-
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    })
-
-    const data = await response.json()
-    if (!response.ok) {
-      throw new Error(data.error || 'Signup failed')
-    }
-
+  const signUp = async (email, password) => {
+    const data = await signup(email, password)
     localStorage.setItem('token', data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
     setUser(data.user)

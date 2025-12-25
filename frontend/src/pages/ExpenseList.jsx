@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import MobileLayout from '../components/Layout/MobileLayout'
 import DesktopLayout from '../components/Layout/DesktopLayout'
 import Avatar from '../components/common/Avatar'
-import { expenseService } from '../services/supabase'
+import { expenseService } from '../services/expense.service'
 
 const categoryIcons = {
   grocery: '🍚',

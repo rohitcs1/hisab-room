@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import MobileLayout from '../components/Layout/MobileLayout'
 import DesktopLayout from '../components/Layout/DesktopLayout'
 import Avatar from '../components/common/Avatar'
-import { balanceService } from '../services/supabase'
+import { balanceService } from '../services/balance.service'
 
 export default function Balance() {
   const { groupId } = useParams()

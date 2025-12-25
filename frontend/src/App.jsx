@@ -9,11 +9,19 @@ import AddExpense from './pages/AddExpense'
 import ExpenseList from './pages/ExpenseList'
 import Balance from './pages/Balance'
 import Profile from './pages/Profile'
+import ScanQR from './pages/ScanQR'
+import JoinGroup from './pages/JoinGroup'
+import CreateGroup from './pages/CreateGroup'
+import EditProfile from './pages/EditProfile'
+import Settings from './pages/Settings'
+import Privacy from './pages/Privacy'
+import Help from './pages/Help'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminAds from './pages/admin/AdminAds'
 import AdminPayments from './pages/admin/AdminPayments'
 import AdminUsers from './pages/admin/AdminUsers'
 import AdminGroups from './pages/admin/AdminGroups'
+import AdminLogin from './pages/admin/AdminLogin'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
@@ -42,7 +50,7 @@ function AdminRoute({ children }) {
 
   // In production, check if user is admin
   const isAdmin = user?.isAdmin || false
-  return isAdmin ? children : <Navigate to="/" />
+  return isAdmin ? children : <Navigate to="/admin/login" />
 }
 
 function AppRoutes() {
@@ -99,8 +107,65 @@ function AppRoutes() {
           </PrivateRoute>
         }
       />
+      <Route
+        path="/profile/edit"
+        element={
+          <PrivateRoute>
+            <EditProfile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/scan"
+        element={
+          <PrivateRoute>
+            <ScanQR />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/join-group/:groupId"
+        element={
+          <PrivateRoute>
+            <JoinGroup />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/create-group"
+        element={
+          <PrivateRoute>
+            <CreateGroup />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <PrivateRoute>
+            <Settings />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/settings/privacy"
+        element={
+          <PrivateRoute>
+            <Privacy />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/settings/help"
+        element={
+          <PrivateRoute>
+            <Help />
+          </PrivateRoute>
+        }
+      />
       
       {/* Admin Routes */}
+      <Route path="/admin/login" element={<AdminLogin />} />
       <Route
         path="/admin"
         element={

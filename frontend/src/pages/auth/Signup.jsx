@@ -4,9 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 
 export default function Signup() {
   const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
-  const [isPhone, setIsPhone] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { signUp } = useAuth()
@@ -18,7 +16,7 @@ export default function Signup() {
     setLoading(true)
 
     try {
-      await signUp(email, password, isPhone ? phone : null)
+      await signUp(email, password)
       navigate('/')
     } catch (err) {
       setError(err.message || 'Failed to sign up')
@@ -43,32 +41,6 @@ export default function Signup() {
         <div className="card p-6 md:p-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Sign Up</h2>
 
-          {/* Toggle Email/Phone */}
-          <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-xl">
-            <button
-              type="button"
-              onClick={() => setIsPhone(false)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                !isPhone
-                  ? 'bg-white text-primary-600 shadow-sm'
-                  : 'text-gray-600'
-              }`}
-            >
-              Email
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPhone(true)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                isPhone
-                  ? 'bg-white text-primary-600 shadow-sm'
-                  : 'text-gray-600'
-              }`}
-            >
-              Phone
-            </button>
-          </div>
-
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
               {error}
@@ -76,35 +48,19 @@ export default function Signup() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {isPhone ? (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+91 9876543210"
-                  className="input-field"
-                  required
-                />
-              </div>
-            ) : (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="input-field"
-                  required
-                />
-              </div>
-            )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="input-field"
+                required
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -143,5 +99,4 @@ export default function Signup() {
     </div>
   )
 }
-
 
