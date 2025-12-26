@@ -16,15 +16,16 @@ export default function Avatar({ name, size = 'md', src = null, className = '' }
     .slice(0, 2) || '?'
 
   return (
-    <div
-      className={`avatar ${sizeClasses[size]} ${className}`}
-      style={{
-        background: src
-          ? `url(${src}) center/cover`
-          : `linear-gradient(135deg, #7dd3fc 0%, #0ea5e9 100%)`,
-      }}
-    >
-      {!src && initials}
+    <div className={`avatar ${sizeClasses[size]} ${className}`}>
+      {src ? (
+        <img
+          src={src}
+          alt={name}
+          className="w-full h-full rounded-full object-cover"
+        />
+      ) : (
+        <span className="text-white font-semibold">{initials}</span>
+      )}
     </div>
   )
 }

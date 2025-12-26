@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { profileService } from '../services/profile.service'
 import MobileLayout from '../components/Layout/MobileLayout'
 import DesktopLayout from '../components/Layout/DesktopLayout'
 import Avatar from '../components/common/Avatar'
@@ -8,12 +9,33 @@ import Avatar from '../components/common/Avatar'
 export default function EditProfile() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [name, setName] = useState(user?.user_metadata?.name || '')
+  const [name, setName] = useState('')
   const [avatarFile, setAvatarFile] = useState(null)
   const [avatarPreview, setAvatarPreview] = useState(null)
+  const [currentAvatar, setCurrentAvatar] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [loadingProfile, setLoadingProfile] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+
+  // Load profile data on component mount
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const response = await profileService.getProfile()
+        const profile = response.profile
+        setName(profile.name || '')
+        setCurrentAvatar(profile.avatar_url)
+      } catch (err) {
+        console.error('Failed to load profile:', err)
+        setError('Failed to load profile')
+      } finally {
+        setLoadingProfile(false)
+      }
+    }
+
+    loadProfile()
+  }, [])
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0]
@@ -44,25 +66,20 @@ export default function EditProfile() {
     setSuccess(false)
 
     try {
-      // Placeholder: Update profile in Supabase
-      // In production:
-      // 1. Upload avatar to Supabase Storage if provided
-      // 2. Update user metadata with new name
-      // 3. Update user avatar URL
-
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
-
+      // First, upload avatar if provided
+      let avatarUrl = currentAvatar
       if (avatarFile) {
-        // Placeholder: Upload to Supabase Storage
-        // const { data: uploadData, error: uploadError } = await supabase.storage
-        //   .from('avatars')
-        //   .upload(`${user.id}/${Date.now()}.jpg`, avatarFile)
+        const formData = new FormData()
+        formData.append('avatar', avatarFile)
+        const uploadResponse = await profileService.uploadAvatar(formData)
+        avatarUrl = uploadResponse.avatar_url
       }
 
-      // Placeholder: Update user metadata
-      // await supabase.auth.updateUser({
-      //   data: { name: name.trim() }
-      // })
+      // Update profile with name and avatar URL
+      await profileService.updateProfile({
+        name: name.trim(),
+        avatar_url: avatarUrl
+      })
 
       setSuccess(true)
       setTimeout(() => {
@@ -93,14 +110,20 @@ export default function EditProfile() {
       </header>
 
       <main className="p-4">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {loadingProfile ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <span className="ml-2 text-gray-600">Loading profile...</span>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
           {/* Avatar Upload */}
           <div className="flex flex-col items-center">
             <label htmlFor="profile-avatar-upload" className="cursor-pointer">
               <Avatar
                 name={name || user?.email || 'User'}
                 size="xl"
-                src={avatarPreview}
+                src={avatarPreview || currentAvatar}
                 className="mb-2"
               />
               <div className="text-center mt-2">
@@ -190,6 +213,7 @@ export default function EditProfile() {
             Cancel
           </button>
         </form>
+        )}
       </main>
     </div>
   )

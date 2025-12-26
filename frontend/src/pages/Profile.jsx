@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { profileService } from '../services/profile.service'
 import MobileLayout from '../components/Layout/MobileLayout'
 import DesktopLayout from '../components/Layout/DesktopLayout'
 import Avatar from '../components/common/Avatar'
@@ -8,6 +9,32 @@ import Avatar from '../components/common/Avatar'
 export default function Profile() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
+  const [profile, setProfile] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        setLoading(true)
+        console.log('Loading profile...')
+        const profileData = await profileService.getProfile()
+        console.log('Profile data received:', profileData)
+        console.log('Profile object:', profileData?.profile)
+        setProfile(profileData.profile)
+        console.log('Profile state set to:', profileData.profile)
+      } catch (err) {
+        console.error('Error loading profile:', err)
+        setError('Failed to load profile')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (user) {
+      loadProfile()
+    }
+  }, []) // Empty dependency array to fetch on every mount
 
   const content = (
       <div className="max-w-2xl mx-auto">
@@ -28,22 +55,39 @@ export default function Profile() {
         </header>
 
         <main className="p-4">
-          {/* Profile Card */}
-          <div className="card p-6 mb-6">
-            <div className="flex flex-col items-center text-center mb-6">
-              <Avatar
-                name={user?.email || 'User'}
-                size="xl"
-                className="mb-4"
-              />
-              <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                {user?.user_metadata?.name || 'User'}
-              </h2>
-              <p className="text-sm text-gray-600">{user?.email}</p>
-              {user?.phone && (
-                <p className="text-sm text-gray-600 mt-1">{user.phone}</p>
-              )}
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
+          ) : error ? (
+            <div className="card p-4 text-center">
+              <p className="text-red-600">{error}</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-2 btn-secondary"
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Profile Card */}
+              <div className="card p-6 mb-6">
+                <div className="flex flex-col items-center text-center mb-6">
+                  <Avatar
+                    name={profile?.name || user?.email || 'User'}
+                    src={profile?.avatar_url}
+                    size="xl"
+                    className="mb-4"
+                  />
+                  <h2 className="text-xl font-semibold text-gray-900 mb-1">
+                    {profile?.name || 'User'}
+                  </h2>
+                  <p className="text-sm text-gray-600">{user?.email}</p>
+                  {user?.phone && (
+                    <p className="text-sm text-gray-600 mt-1">{user.phone}</p>
+                  )}
+                </div>
 
             <button 
               onClick={() => navigate('/profile/edit')}
@@ -84,6 +128,8 @@ export default function Profile() {
             </svg>
             <span className="font-medium">Logout</span>
           </button>
+            </>
+          )}
         </main>
       </div>
   )
